@@ -1,7 +1,5 @@
 package pl.smolo.icse.dom;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,17 +49,8 @@ public abstract class AbstractResultsPageParser {
 		Tidy tidy = new Tidy();
 
 		Document doc = null;
-
-		File lvTmpFile = null;
-		FileOutputStream lvFOS = null;
 		try
 		{
-			lvTmpFile = new File("test.txt");
-			if (!lvTmpFile.exists())
-				lvTmpFile.createNewFile();
-
-			lvFOS = new FileOutputStream(lvTmpFile);
-
 			Properties properties = new Properties();
 			properties.setProperty("tidy-mark", "false");
 			properties.setProperty("output-xml", "no");
@@ -83,20 +72,11 @@ public abstract class AbstractResultsPageParser {
 
 			tidy.getConfiguration().addProps(properties);
 
-			doc = tidy.parseDOM(input, lvFOS);
+			doc = tidy.parseDOM(input, null);
 		} 
 		catch (Exception e)
 		{
 			e.printStackTrace();
-		} 
-		finally
-		{
-			try
-			{
-				lvFOS.close();
-			} 
-			catch (Exception e) {
-			}
 		}
 
 		return doc;
