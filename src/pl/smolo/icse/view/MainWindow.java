@@ -6,8 +6,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -20,9 +23,45 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.text.Document;
+
+import pl.smolo.icse.core.SearchExecutor;
+import pl.smolo.icse.model.SamochodRow;
+import pl.smolo.icse.model.Ustawienia;
+import pl.smolo.icse.utils.CarModelsDb;
 
 public class MainWindow extends JFrame
 {
+	private enum TextFieldName
+	{
+		CENA_OD("setCenaOd"),
+		CENA_DO("setCenaDo"),
+		ROCZNIK_OD("setRocznikOd"),
+		ROCZNIK_DO("setRocznikDo"),
+		PRZEBIEG_OD("setPrzebiegOd"),
+		PRZEBIEG_DO("setPrzebiegDo"),
+		MOC_OD("setMocOd"),
+		MOC_DO("setMocDo"),
+		POJEMNOSC_OD("setPojemnoscOd"),
+		POJEMNOSC_DO("setPojemnoscDo");
+		
+		private String methodName;
+		
+		private TextFieldName(String pmMethodName)
+		{
+			methodName = pmMethodName;
+		}
+		
+		public String getMethodName()
+		{
+			return methodName;
+		}
+	}
+	
 	private static final long serialVersionUID = 102085096118702079L;
 
 	/**
@@ -107,6 +146,10 @@ public class MainWindow extends JFrame
 	
 	private MainWindowActionListener actionListener;
 	
+	private Ustawienia ustawienia = Ustawienia.getInstance();
+	
+	private SearchExecutor searchExecutor = new SearchExecutor();
+	
 	public MainWindow()
 	{
 		super();
@@ -175,10 +218,29 @@ public class MainWindow extends JFrame
 		markButton.addActionListener(actionListener);
 		markButton.setHorizontalAlignment(SwingConstants.LEFT);
 		
-		markList = new JList<String>(new String[]{"Opel","BMW"});
+		markList = new JList<String>(CarModelsDb.getModelsList());
 		markList.setSelectionModel(new MultiSelectListSelectionModel());
 		markList.setCellRenderer(new CustomComboBoxRenderer());
 		markList.setVisible(false);
+		markList.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent arg0)
+			{
+				List<String> selected = markList.getSelectedValuesList();
+				
+				Vector<String> wynik = new Vector<String>();
+				for (String mark : selected)
+				{
+					wynik.add("--" + mark + "--");
+					wynik.addAll(CarModelsDb.getModelsForMark(mark));
+				}
+				if (wynik.size() == 0)
+					wynik.add("--Wybierz marke--");
+				
+				modelList.setListData(wynik);
+			}
+		});
 		
 		modelButton = new JButton("Model >>");
 		modelButton.setFocusPainted(false);
@@ -187,31 +249,41 @@ public class MainWindow extends JFrame
 		modelButton.addActionListener(actionListener);
 		modelButton.setHorizontalAlignment(SwingConstants.LEFT);
 		
-		modelList = new JList<String>(new String[]{"Astra","Vectra"});
+		modelList = new JList<String>(new String[]{"--Wybierz marke--"});
 		modelList.setSelectionModel(new MultiSelectListSelectionModel());
-		modelList.setCellRenderer(new CustomComboBoxRenderer());
+		modelList.setCellRenderer(new CustomComboBoxRenderer(markList));
 		modelList.setVisible(false);
 		
 		priceLabel = new JLabel("Cena");
 		
 		priceFromField = new JTextField(8);
 		priceFromField.setSize(80, 20);
+		priceFromField.getDocument().addDocumentListener(actionListener);
+		priceFromField.getDocument().putProperty("name", TextFieldName.CENA_OD);
 		
 		priceToField = new JTextField(8);
 		priceToField.setSize(80, 20);
+		priceToField.getDocument().addDocumentListener(actionListener);
+		priceToField.getDocument().putProperty("name", TextFieldName.CENA_DO);
 		
 		yearLabel = new JLabel("Rocznik");
 		
 		yearFromField = new JTextField(4);
 		yearFromField.setSize(80, 20);
+		yearFromField.getDocument().addDocumentListener(actionListener);
+		yearFromField.getDocument().putProperty("name", TextFieldName.ROCZNIK_OD);
 		
 		yearToField = new JTextField(4);
 		yearToField.setSize(80, 20);
+		yearToField.getDocument().addDocumentListener(actionListener);
+		yearToField.getDocument().putProperty("name", TextFieldName.ROCZNIK_DO);
 		
 		mileageLabel = new JLabel("Przebieg");
 		
 		mileageFromField = new JTextField(7);
 		mileageFromField.setSize(80, 20);
+		mileageFromField.getDocument().addDocumentListener(actionListener);
+		mileageFromField.getDocument().putProperty("name", TextFieldName.PRZEBIEG_OD);
 		
 		mileageToField = new JTextField(7);
 		mileageToField.setSize(80, 20);
@@ -220,17 +292,25 @@ public class MainWindow extends JFrame
 		
 		horsepowerFromField = new JTextField(4);
 		horsepowerFromField.setSize(80, 20);
+		horsepowerFromField.getDocument().addDocumentListener(actionListener);
+		horsepowerFromField.getDocument().putProperty("name", TextFieldName.MOC_OD);
 		
 		horsepowerToField = new JTextField(4);
 		horsepowerToField.setSize(80, 20);
+		horsepowerToField.getDocument().addDocumentListener(actionListener);
+		horsepowerToField.getDocument().putProperty("name", TextFieldName.MOC_DO);
 		
 		capacityLabel = new JLabel("Pojemnosc");
 		
 		capacityFromField = new JTextField(5);
 		capacityFromField.setSize(80, 20);
+		capacityFromField.getDocument().addDocumentListener(actionListener);
+		capacityFromField.getDocument().putProperty("name", TextFieldName.POJEMNOSC_OD);
 		
 		capacityToField = new JTextField(5);
 		capacityToField.setSize(80, 20);
+		capacityToField.getDocument().addDocumentListener(actionListener);
+		capacityToField.getDocument().putProperty("name", TextFieldName.POJEMNOSC_DO);
 		
 		searchOptionsPanel.add(markButton, 
 				new GridBagConstraints(
@@ -668,14 +748,34 @@ public class MainWindow extends JFrame
 		
 		resultsPanel = new JPanel();
 		resultsPanel.setSize(900, 725);
-		resultsPanel.setBorder(BorderFactory.createLineBorder(Color.YELLOW));
+		resultsPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
+		resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.PAGE_AXIS));
 		resultsPanel.setLocation(300, 0);
 		this.add(resultsPanel);
 		
 		this.setVisible(true);
 	}
 	
-	private class MainWindowActionListener implements ActionListener
+	private void wyswietlWynik()
+	{
+		try
+		{
+			resultsPanel.removeAll();
+			List<SamochodRow> wyniki = searchExecutor.search();
+			for (SamochodRow samochod : wyniki)
+				resultsPanel.add(new SamochodView(samochod));
+			
+			resultsPanel.updateUI();
+		}
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private class MainWindowActionListener implements ActionListener, DocumentListener
 	{
 		@Override
 		public void actionPerformed(ActionEvent evt)
@@ -692,11 +792,51 @@ public class MainWindow extends JFrame
 			}
 			else if (clearAllButton.equals(evt.getSource()))
 			{
-				System.out.println("wyczysc");
+				ustawienia.reset();
 			}
 			else if (searchButton.equals(evt.getSource()))
 			{
-				System.out.println("szukaj");
+				wyswietlWynik();
+			}
+			else if (autotraderPlMenuItem.equals(evt.getSource()))
+			{
+				ustawienia.setAutotraderActive(!ustawienia.isAutotraderActive());
+			}
+			else if (mobileEuMenuItem.equals(evt.getSource()))
+			{
+				ustawienia.setMobileEuActive(!ustawienia.isMobileEuActive());
+			}
+		}
+
+		@Override
+		public void changedUpdate(DocumentEvent evt)
+		{
+			zmienUstawienia(evt);
+		}
+
+		@Override
+		public void insertUpdate(DocumentEvent evt)
+		{
+			zmienUstawienia(evt);
+		}
+
+		@Override
+		public void removeUpdate(DocumentEvent evt)
+		{
+			zmienUstawienia(evt);
+		}
+		
+		private void zmienUstawienia(DocumentEvent evt)
+		{
+			Document doc = evt.getDocument();
+			TextFieldName txName = (TextFieldName)doc.getProperty("name");
+			try
+			{
+				ustawienia.update(txName.getMethodName(), doc.getText(0, doc.getLength()));
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
 	}

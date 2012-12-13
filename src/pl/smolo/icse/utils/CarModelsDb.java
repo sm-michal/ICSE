@@ -1,18 +1,53 @@
 package pl.smolo.icse.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 public class CarModelsDb
 {
-	private static Map<String, List<String>> mModelMap = new HashMap<String, List<String>>();
+	private static TreeMap<String, List<String>> mModelMap = new TreeMap<String, List<String>>(new Comparator<String>() {
+		public int compare(String pmKey1, String pmKey2)
+		{
+			return pmKey1.compareTo(pmKey2);
+		}
+	});
 	
 	static
 	{
 		mModelMap.put("Abarth", Arrays.asList("500","500C","Grande Punto","Punto Evo"));
 		mModelMap.put("Acura", Arrays.asList("MSX","NSX","RL","RSX","TL","TSX"));
+//		mModelMap.put("Aixam", Arrays.asList(""));
+		mModelMap.put("Alfa Romeo", Arrays.asList("146","147","156","166"));
+//		mModelMap.put("Alpina", Arrays.asList(""));
+//		mModelMap.put("Aro", Arrays.asList(""));
+//		mModelMap.put("Artega", Arrays.asList(""));
+//		mModelMap.put("Asia Motors", Arrays.asList(""));
+//		mModelMap.put("Aston Martin", Arrays.asList(""));
+		mModelMap.put("Audi", Arrays.asList("A1","A3","S3","A4","S4","A5","S5","A6","S6","A7","A8","S8"));
+//		mModelMap.put("Austin", Arrays.asList(""));
+//		mModelMap.put("Austin Healev", Arrays.asList(""));
+//		mModelMap.put("Bentley", Arrays.asList(""));
+		mModelMap.put("BMW", Arrays.asList("1","3","5","6","7","8"));
+//		mModelMap.put("Borgward", Arrays.asList(""));
+//		mModelMap.put("Brilliance", Arrays.asList(""));
+//		mModelMap.put("Bugatti", Arrays.asList(""));
+//		mModelMap.put("Buick", Arrays.asList(""));
+//		mModelMap.put("Cadillac", Arrays.asList(""));
+//		mModelMap.put("Caterham", Arrays.asList(""));
+//		mModelMap.put("Chevrolet", Arrays.asList(""));
+//		mModelMap.put("Chrysler", Arrays.asList(""));
+		mModelMap.put("Citroen", Arrays.asList("C1","C2"));
+//		mModelMap.put("Cobra", Arrays.asList(""));
+//		mModelMap.put("Corvette", Arrays.asList(""));
+//		mModelMap.put("Dacia", Arrays.asList(""));
+		mModelMap.put("Daewoo", Arrays.asList("Espero","Matiz","Tico"));
+//		mModelMap.put("Daihatsu", Arrays.asList(""));
+//		mModelMap.put("Datsun", Arrays.asList(""));
+		
 	}
 
 	/*
@@ -70,7 +105,7 @@ public class CarModelsDb
 	    	<option value="12400">Jaguar</option>     
 	    	<option value="12600">Jeep</option>     
 	    	<option value="13200">Kia</option>     
-	    	<option value="13450">Königsegg</option>     
+	    	<option value="13450">Koenigsegg</option>     
 	    	<option value="13900">KTM</option>     
 	    	<option value="14400">Lada</option>     
 	    	<option value="14600">Lamborghini</option>     
@@ -145,9 +180,33 @@ public class CarModelsDb
 	    	<option value="25650">Wiesmann</option>     
 	    	<option value="42">Zastawa</option>     
 	    	<option value="30019">ZAZ</option>     
-	    	<option value="43">Żuk</option>     
+	    	<option value="43">�uk</option>     
 	    	<option value="1400">Inne</option>     
 	</select> 
 	 
 	 */
+	
+	public static String[] getModelsList()
+	{
+		return mModelMap.keySet().toArray(new String[0]);
+	}
+	
+	public static List<String> getModelsForMark(String pmMark)
+	{
+		if (StringUtils.isEmpty(pmMark) || !mModelMap.containsKey(pmMark))
+			return new ArrayList<String>();
+		
+		return mModelMap.get(pmMark);
+	}
+	
+	public static String[] getAllModels()
+	{
+		List<String> lvWynik = new ArrayList<String>();
+		for (Entry<String, List<String>> entry : mModelMap.entrySet())
+		{
+			lvWynik.add("-- " + entry.getKey() + " --");
+			lvWynik.addAll(entry.getValue());
+		}
+		return lvWynik.toArray(new String[0]);
+	}
 }

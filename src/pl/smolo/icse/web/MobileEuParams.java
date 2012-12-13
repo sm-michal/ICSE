@@ -1,6 +1,6 @@
 package pl.smolo.icse.web;
 
-public class MobileEuParams implements ParamsGenerator
+public class MobileEuParams extends ParamsGenerator
 {
 
 	@Override

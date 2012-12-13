@@ -1,7 +1,10 @@
 package pl.smolo.icse.web;
 
-public interface ParamsGenerator {
+import pl.smolo.icse.model.Ustawienia;
+import pl.smolo.icse.utils.StringUtils;
 
+public abstract class ParamsGenerator {
+	
 	public abstract String getTotalResultsCountURL();
 
 	public abstract String getSearchURL();
@@ -25,4 +28,23 @@ public interface ParamsGenerator {
 	public abstract String getMakeValue(String pmMake);
 	
 	public abstract String getModelValue(String pmModel);
+	
+	public String getFullSearchUrl()
+	{
+		Ustawienia ustawienia = Ustawienia.getInstance();
+		String lvURL = getSearchURL();
+		if (!lvURL.endsWith("?"))
+			lvURL += "&";
+		
+		if (!StringUtils.isEmpty(ustawienia.getCenaOd()))
+			lvURL += getPriceMin() + ustawienia.getCenaOd() + "&";
+		if (!StringUtils.isEmpty(ustawienia.getCenaDo()))
+			lvURL += getPriceMax() + ustawienia.getCenaDo() + "&";
+		if (!StringUtils.isEmpty(ustawienia.getRocznikOd()))
+			lvURL += getYearMin() + ustawienia.getRocznikOd() + "&";
+		if (!StringUtils.isEmpty(ustawienia.getRocznikDo()))
+			lvURL += getYearMax() + ustawienia.getRocznikDo() + "&";
+			
+		return lvURL;
+	}
 }

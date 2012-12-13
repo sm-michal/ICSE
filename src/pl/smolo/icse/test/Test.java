@@ -15,6 +15,7 @@ import pl.smolo.icse.core.SimpleSearchEngine;
 import pl.smolo.icse.dom.AutotraderPlParser;
 import pl.smolo.icse.dom.MobileEuParser;
 import pl.smolo.icse.model.SamochodRow;
+import pl.smolo.icse.view.MainWindow;
 import pl.smolo.icse.view.SamochodView;
 import pl.smolo.icse.web.AutotraderPlParams;
 import pl.smolo.icse.web.MobileEuParams;
@@ -28,6 +29,8 @@ public class Test {
 	{
 		try
 		{
+			new MainWindow();
+			/*
 			List<SimpleSearchEngine> engines = new ArrayList<SimpleSearchEngine>();
 			String answer;
 			Scanner scanner = new Scanner(System.in);
@@ -69,7 +72,7 @@ public class Test {
 			mainFrame.add(scroll);
 			mainFrame.setVisible(true);
 			mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			
+			*/
 		} catch (Exception e)
 		{
 			e.printStackTrace();

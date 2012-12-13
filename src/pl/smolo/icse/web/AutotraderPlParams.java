@@ -1,6 +1,7 @@
 package pl.smolo.icse.web;
 
-public class AutotraderPlParams implements ParamsGenerator
+
+public class AutotraderPlParams extends ParamsGenerator
 {
 
 	@Override

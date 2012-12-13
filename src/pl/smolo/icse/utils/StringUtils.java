@@ -1,8 +1,16 @@
 package pl.smolo.icse.utils;
 
+/**
+ * Metody pomocniczne dla klasy String. Wszystkie metody sa null-safe.
+ * @author smolo
+ */
 public class StringUtils
 {
-
+	/**
+	 * Usuwa poczatkowe i koncowe spacje.
+	 * @param pmString
+	 * @return
+	 */
 	public static String trim(String pmString)
 	{
 		if (pmString == null)
@@ -10,11 +18,21 @@ public class StringUtils
 		return pmString.trim();
 	}
 
+	/**
+	 * Sprawdza, czy podany ciag znakow jest pusty
+	 * @param pmString
+	 * @return
+	 */
 	public static boolean isEmpty(String pmString)
 	{
 		return pmString == null || "".equals(pmString.trim());
 	}
 
+	/**
+	 * Lamie podany ciag znakow do dlugosci 75 znakow, wstawiajac nowe linie
+	 * @param pmString
+	 * @return
+	 */
 	public static String insertBreakLines(String pmString)
 	{
 		StringBuilder lvResult = new StringBuilder("");

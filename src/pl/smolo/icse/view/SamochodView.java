@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
@@ -64,11 +65,18 @@ public class SamochodView extends JPanel {
 			this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.LIGHT_GRAY));
 			this.addMouseListener(new SamochodMouseAdapter());
 
-			ImageIcon icon = new ImageIcon(ImageIO.read(new URL(samochodData.getImageHref())));
-
 			imageLabel = new JLabel();
-			imageLabel.setIcon(icon);
 			imageLabel.setPreferredSize(new Dimension(90, 80));
+			
+			BufferedImage image = null;
+			try
+			{
+				image = ImageIO.read(new URL(samochodData.getImageHref()));
+				imageLabel.setIcon(new ImageIcon(image));
+			}
+			catch (Exception e)
+			{
+			}
 
 			nameLabel = new JLabel(samochodData.getCarName());
 			nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
