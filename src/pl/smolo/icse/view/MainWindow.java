@@ -1,11 +1,17 @@
 package pl.smolo.icse.view;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Vector;
 
@@ -13,6 +19,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -23,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -32,36 +40,14 @@ import javax.swing.text.Document;
 import pl.smolo.icse.core.SearchExecutor;
 import pl.smolo.icse.model.SamochodRow;
 import pl.smolo.icse.model.Ustawienia;
+import pl.smolo.icse.model.UstawieniaField;
 import pl.smolo.icse.utils.CarModelsDb;
+import pl.smolo.icse.utils.TextFieldName;
+import pl.smolo.icse.view.custom.CustomComboBoxRenderer;
+import pl.smolo.icse.view.custom.CustomProgressMonitor;
 
 public class MainWindow extends JFrame
 {
-	private enum TextFieldName
-	{
-		CENA_OD("setCenaOd"),
-		CENA_DO("setCenaDo"),
-		ROCZNIK_OD("setRocznikOd"),
-		ROCZNIK_DO("setRocznikDo"),
-		PRZEBIEG_OD("setPrzebiegOd"),
-		PRZEBIEG_DO("setPrzebiegDo"),
-		MOC_OD("setMocOd"),
-		MOC_DO("setMocDo"),
-		POJEMNOSC_OD("setPojemnoscOd"),
-		POJEMNOSC_DO("setPojemnoscDo");
-		
-		private String methodName;
-		
-		private TextFieldName(String pmMethodName)
-		{
-			methodName = pmMethodName;
-		}
-		
-		public String getMethodName()
-		{
-			return methodName;
-		}
-	}
-	
 	private static final long serialVersionUID = 102085096118702079L;
 
 	/**
@@ -143,12 +129,25 @@ public class MainWindow extends JFrame
 	 * lista z wynikami
 	 */
 	private JPanel resultsPanel;
+	private JPanel pagingPanel;
+	
+	private JComboBox<UstawieniaField> checkedOptionsCombo;
+	
+	private JButton firstPageButton;
+	private JButton previousPageButton;
+	private JLabel currentPageLabel;
+	private JButton nextPageButton;
+	private JButton lastPageButton;
+	
+	private JScrollPane resultsScrollPanel;
+	private JPanel resultsInnerPanel;
 	
 	private MainWindowActionListener actionListener;
 	
 	private Ustawienia ustawienia = Ustawienia.getInstance();
 	
 	private SearchExecutor searchExecutor = new SearchExecutor();
+	private CustomProgressMonitor searchMonitor;
 	
 	public MainWindow()
 	{
@@ -160,7 +159,7 @@ public class MainWindow extends JFrame
 	{
 		actionListener = new MainWindowActionListener();
 		
-		this.setSize(1200, 750);
+		this.setSize(1220, 750);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
 		this.setResizable(false);
@@ -184,9 +183,11 @@ public class MainWindow extends JFrame
 		
 		sitesMenu = new JMenu("Portale");
 		mobileEuMenuItem = new JCheckBoxMenuItem("mobile.eu");
+		mobileEuMenuItem.setState(ustawienia.isMobileEuActive());
 		mobileEuMenuItem.addActionListener(actionListener);
 		
 		autotraderPlMenuItem = new JCheckBoxMenuItem("autotrader.pl");
+		autotraderPlMenuItem.setState(ustawienia.isAutotraderActive());
 		autotraderPlMenuItem.addActionListener(actionListener);
 		
 		sitesMenu.add(mobileEuMenuItem);
@@ -382,7 +383,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("od"),
+		searchOptionsPanel.add(new JLabel(" od "),
 				new GridBagConstraints(
 						0, 
 						5, 
@@ -410,7 +411,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("do"),
+		searchOptionsPanel.add(new JLabel(" do "),
 				new GridBagConstraints(
 						2, 
 						5, 
@@ -452,7 +453,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("od"),
+		searchOptionsPanel.add(new JLabel(" od "),
 				new GridBagConstraints(
 						0, 
 						7, 
@@ -480,7 +481,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("do"),
+		searchOptionsPanel.add(new JLabel(" do "),
 				new GridBagConstraints(
 						2, 
 						7, 
@@ -522,7 +523,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("od"),
+		searchOptionsPanel.add(new JLabel(" od "),
 				new GridBagConstraints(
 						0, 
 						9, 
@@ -550,7 +551,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("do"),
+		searchOptionsPanel.add(new JLabel(" do "),
 				new GridBagConstraints(
 						2, 
 						9, 
@@ -592,7 +593,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("od"),
+		searchOptionsPanel.add(new JLabel(" od "),
 				new GridBagConstraints(
 						0, 
 						11, 
@@ -620,7 +621,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("do"),
+		searchOptionsPanel.add(new JLabel(" do "),
 				new GridBagConstraints(
 						2, 
 						11, 
@@ -662,7 +663,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("od"),
+		searchOptionsPanel.add(new JLabel(" od "),
 				new GridBagConstraints(
 						0, 
 						13, 
@@ -690,7 +691,7 @@ public class MainWindow extends JFrame
 						0,
 						0)
 		);
-		searchOptionsPanel.add(new JLabel("do"),
+		searchOptionsPanel.add(new JLabel(" do "),
 				new GridBagConstraints(
 						2, 
 						13, 
@@ -747,36 +748,134 @@ public class MainWindow extends JFrame
 		this.add(optionsInnerPanel);
 		
 		resultsPanel = new JPanel();
-		resultsPanel.setSize(900, 725);
+		resultsPanel.setSize(920, 725);
 		resultsPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
-		resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.PAGE_AXIS));
+		resultsPanel.setLayout(new BorderLayout());
 		resultsPanel.setLocation(300, 0);
+		
+		pagingPanel = new JPanel();
+		pagingPanel.setSize(920, 100);
+		pagingPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
+		pagingPanel.setLocation(0, 0);
+		
+		checkedOptionsCombo = new JComboBox<UstawieniaField>();
+		checkedOptionsCombo.removeAllItems();
+		checkedOptionsCombo.setSize(150, 25);
+		checkedOptionsCombo.setVisible(false);
+		checkedOptionsCombo.addItemListener(actionListener);
+		
+		firstPageButton = new JButton("|<<");
+		firstPageButton.setSize(40, 25);
+		
+		previousPageButton = new JButton(" < ");
+		previousPageButton.setSize(40, 25);
+		
+		currentPageLabel = new JLabel(" 0 - 0 / 0 ");
+		currentPageLabel.setSize(60, 25);
+		
+		nextPageButton = new JButton(" > ");
+		nextPageButton.setSize(40, 25);
+		
+		lastPageButton = new JButton(">>|");
+		lastPageButton.setSize(40, 25);
+		
+		pagingPanel.add(checkedOptionsCombo);
+		pagingPanel.add(firstPageButton);
+		pagingPanel.add(previousPageButton);
+		pagingPanel.add(currentPageLabel);
+		pagingPanel.add(nextPageButton);
+		pagingPanel.add(lastPageButton);
+		
+		resultsInnerPanel = new JPanel();
+		resultsInnerPanel.setLayout(new BoxLayout(resultsInnerPanel, BoxLayout.PAGE_AXIS));
+		
+		resultsScrollPanel = new JScrollPane(resultsInnerPanel);
+		resultsScrollPanel.setSize(920, 625);
+		resultsScrollPanel.setLocation(0, 100);
+		
+		resultsPanel.add(pagingPanel, BorderLayout.PAGE_START);
+		resultsPanel.add(resultsScrollPanel);
+		
 		this.add(resultsPanel);
 		
 		this.setVisible(true);
 	}
 	
+	private void updateOptionsCombo()
+	{
+		UstawieniaField[] lvOptions = Ustawienia.getInstance().getUstawieniaList();
+		checkedOptionsCombo.removeItemListener(actionListener);
+		checkedOptionsCombo.removeAllItems();
+		for (UstawieniaField lvOpt : lvOptions)
+			checkedOptionsCombo.addItem(lvOpt);
+		
+		checkedOptionsCombo.setVisible(lvOptions.length > 0);
+		checkedOptionsCombo.addItemListener(actionListener);
+	}
+	
 	private void wyswietlWynik()
 	{
-		try
-		{
-			resultsPanel.removeAll();
-			List<SamochodRow> wyniki = searchExecutor.search();
-			for (SamochodRow samochod : wyniki)
-				resultsPanel.add(new SamochodView(samochod));
+		searchMonitor = new CustomProgressMonitor(MainWindow.this, "Trwa wczytywanie danych...", "", 0, 100, true, "Czekaj...", true);
+		searchMonitor.setMillisToPopup(0);
+		searchMonitor.setMillisToDecideToPopup(0);
+		
+		SwingWorker<Void, Void> lvWorker = new SwingWorker<Void, Void>(){
+			@Override
+			protected Void doInBackground() throws Exception
+			{
+				try
+				{
+					setProgress(1);
+					
+					searchButton.setEnabled(false);
+					
+					resultsInnerPanel.removeAll();
+					
+					updateOptionsCombo();
+					
+					List<SamochodRow> wyniki = searchExecutor.search();					
+					for (SamochodRow samochod : wyniki)
+						resultsInnerPanel.add(new SamochodView(samochod));
+					
+					resultsInnerPanel.updateUI();	
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				
+				setProgress(100);
+				
+				return null;
+			}
 			
-			resultsPanel.updateUI();
-		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			@Override
+			protected void done()
+			{
+				System.out.println("Done");
+				searchButton.setEnabled(true);
+			}
+		};
+		
+		lvWorker.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if ("progress".equals(evt.getPropertyName()))
+				{
+					int progress = (Integer)evt.getNewValue();
+					searchMonitor.setProgress(progress);
+				}
+			}
+		});
+		lvWorker.execute();
 		
 	}
 	
-	private class MainWindowActionListener implements ActionListener, DocumentListener
+	private class MainWindowActionListener implements ActionListener, DocumentListener, ItemListener
 	{
+		private boolean optionComboSelectionChanged = false;
+		
 		@Override
 		public void actionPerformed(ActionEvent evt)
 		{
@@ -806,6 +905,14 @@ public class MainWindow extends JFrame
 			{
 				ustawienia.setMobileEuActive(!ustawienia.isMobileEuActive());
 			}
+			/*else if (checkedOptionsCombo.equals(evt.getSource()))
+			{
+				if (checkedOptionsCombo.getSelectedIndex() != -1 && checkedOptionsCombo.getItemCount() > 0)
+				{
+					checkedOptionsCombo.remove(checkedOptionsCombo.getSelectedIndex());
+					wyswietlWynik();
+				}
+			}*/
 		}
 
 		@Override
@@ -832,11 +939,43 @@ public class MainWindow extends JFrame
 			TextFieldName txName = (TextFieldName)doc.getProperty("name");
 			try
 			{
-				ustawienia.update(txName.getMethodName(), doc.getText(0, doc.getLength()));
+				ustawienia.update(txName.getSetterMethodName(), doc.getText(0, doc.getLength()));
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void itemStateChanged(ItemEvent e)
+		{
+			if (checkedOptionsCombo.equals(e.getSource()) && e.getStateChange() == ItemEvent.SELECTED && optionComboSelectionChanged)
+			{
+				UstawieniaField field = (UstawieniaField)checkedOptionsCombo.getSelectedItem();
+				
+				Component[] lvComponents = searchOptionsPanel.getComponents();
+				for (Component comp : lvComponents)
+				{
+					if (comp instanceof JTextField)
+					{
+						JTextField tf = (JTextField)comp;
+						System.out.println(tf.getDocument().getProperty("name"));
+						if (field.getFieldName() == tf.getDocument().getProperty("name"))
+						{
+							tf.setText("");
+							break;
+						}
+					}
+				}
+				
+				optionComboSelectionChanged = false;
+				
+				wyswietlWynik();
+			}
+			else if (checkedOptionsCombo.equals(e.getSource()) && e.getStateChange() == ItemEvent.DESELECTED && !optionComboSelectionChanged)
+			{
+				optionComboSelectionChanged = true;
 			}
 		}
 	}

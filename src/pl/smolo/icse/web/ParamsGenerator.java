@@ -44,6 +44,10 @@ public abstract class ParamsGenerator {
 			lvURL += getYearMin() + ustawienia.getRocznikOd() + "&";
 		if (!StringUtils.isEmpty(ustawienia.getRocznikDo()))
 			lvURL += getYearMax() + ustawienia.getRocznikDo() + "&";
+		if (!StringUtils.isEmpty(ustawienia.getPrzebiegOd()))
+			lvURL += getMileageMin() + ustawienia.getPrzebiegOd() + "&";
+		if (!StringUtils.isEmpty(ustawienia.getPrzebiegDo()))
+			lvURL += getMileageMax() + ustawienia.getPrzebiegDo() + "&";
 			
 		return lvURL;
 	}

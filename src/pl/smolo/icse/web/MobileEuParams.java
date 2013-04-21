@@ -49,7 +49,7 @@ public class MobileEuParams extends ParamsGenerator
 	@Override
 	public String getYearMax()
 	{
-		return "minConstructionYear=";
+		return "maxConstructionYear=";
 	}
 
 	@Override

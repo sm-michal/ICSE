@@ -4,6 +4,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import pl.smolo.icse.utils.StringUtils;
+import pl.smolo.icse.utils.TextFieldName;
+
 public class Ustawienia
 {
 	private static Ustawienia ustawieniaInstance = null;
@@ -21,8 +24,8 @@ public class Ustawienia
 	private String pojemnoscOd;
 	private String pojemnoscDo;
 	
-	private boolean mobileEuActive = false;
-	private boolean autotraderActive = false;
+	private boolean mobileEuActive = true;
+	private boolean autotraderActive = true;
 	
 	private Ustawienia()
 	{
@@ -56,6 +59,23 @@ public class Ustawienia
 	{
 		Method method = getClass().getDeclaredMethod(pmMethodName, String.class);
 		method.invoke(ustawieniaInstance, pmValue);
+	}
+	
+	public UstawieniaField[] getUstawieniaList()
+	{
+		List<UstawieniaField> lvUstawienia = new ArrayList<UstawieniaField>();
+		//TODO dodac marki i modele
+		if (!StringUtils.isEmpty(cenaOd))
+			lvUstawienia.add(new UstawieniaField("Cena od " + cenaOd,TextFieldName.CENA_OD));
+		if (!StringUtils.isEmpty(cenaDo))
+			lvUstawienia.add(new UstawieniaField("Cena do " + cenaDo,TextFieldName.CENA_DO));
+		if (!StringUtils.isEmpty(rocznikOd))
+			lvUstawienia.add(new UstawieniaField("Rocznik od " + rocznikOd,TextFieldName.ROCZNIK_OD));
+		if (!StringUtils.isEmpty(rocznikDo))
+			lvUstawienia.add(new UstawieniaField("Rocznik do " + rocznikDo,TextFieldName.ROCZNIK_DO));
+		
+		
+		return lvUstawienia.toArray(new UstawieniaField[0]);
 	}
 
 	public List<String> getMarki()
